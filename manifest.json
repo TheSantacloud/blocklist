@@ -1,0 +1,28 @@
+{
+    "name": "blocklist",
+    "version": "0.1.0",
+    "description": "Privately manage a block list for websites",
+    "manifest_version": 3,
+    "permissions": [
+        "activeTab",
+        "storage",
+        "scripting"
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_start"
+        }
+    ]
+}
