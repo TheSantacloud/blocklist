@@ -1,6 +1,6 @@
 {
     "name": "blocklist",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Privately manage a block list for websites",
     "manifest_version": 3,
     "permissions": [
@@ -9,7 +9,16 @@
         "scripting"
     ],
     "action": {
-        "default_popup": "popup.html"
+        "default_icon": {
+            "16": "assets/icon_gray_128.png",
+            "48": "assets/icon_gray_128.png",
+            "128": "assets/icon_gray_128.png"
+        }
+    },
+    "icons": {
+        "16": "assets/icon_gray_128.png",
+        "48": "assets/icon_gray_128.png",
+        "128": "assets/icon_gray_128.png"
     },
     "background": {
         "service_worker": "background.js"
