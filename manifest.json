@@ -23,6 +23,15 @@
     "background": {
         "service_worker": "background.js"
     },
+    "commands": {
+        "enable_blocklist": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+B",
+                "mac": "MacCtrl+Shift+B"
+            },
+            "description": "Enable Blocklist"
+        }
+    },
     "content_scripts": [
         {
             "matches": [

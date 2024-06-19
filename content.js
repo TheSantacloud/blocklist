@@ -23,10 +23,8 @@ function generateBlockHtml(url) {
 
 function checkAndBlockSites() {
     if (!window.blockListEnabled) {
-        console.log('Block list is not enabled. Exiting script.');
         return;
     }
-
 
     Object.keys(blockList).forEach(url => {
         if (document.URL.includes(url)) {
@@ -43,7 +41,7 @@ chrome.storage.local.get('blockListEnabled', function(result) {
     checkAndBlockSites();
 });
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function(request) {
     if (request.action === 'updateFeatureState') {
         window.blockListEnabled = request.blockListEnabled;
         checkAndBlockSites();

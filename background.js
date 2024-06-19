@@ -22,3 +22,23 @@ chrome.runtime.onStartup.addListener(() => {
     });
 });
 
+chrome.storage.onChanged.addListener((changes, namespace) => {
+    for (let [key] of Object.entries(changes)) {
+        if (key === "blockListEnabled") {
+            chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+                chrome.tabs.reload(tabs[0].id);
+            });
+        }
+    }
+});
+
+chrome.commands.onCommand.addListener(async (command) => {
+    if (command === "enable_blocklist") {
+        chrome.storage.local.set({ blockListEnabled: true }, () => {
+            updateIcon(true);
+        });
+    } else {
+        console.error("unknown command");
+    }
+});
+
