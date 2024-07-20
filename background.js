@@ -3,8 +3,15 @@ chrome.runtime.onInstalled.addListener(function() {
 });
 
 chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
-    const currentUrl = details.url;
-    const tabId = details.tabId;
+    blockIfNeeded(details.tabId, details.url)
+});
+
+chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
+    if (!tab.url) return;
+    blockIfNeeded(tabId, tab.url)
+})
+
+function blockIfNeeded(tabId, currentUrl) {
     chrome.storage.sync.get("blockList", (data) => {
         for (let blockUrl in data.blockList) {
             if (!currentUrl.includes(blockUrl)) continue;
@@ -18,7 +25,7 @@ chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
             });
         }
     });
-});
+}
 
 chrome.storage.onChanged.addListener((changes) => {
     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {

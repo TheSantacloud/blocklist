@@ -1,10 +1,11 @@
 {
     "name": "blocklist",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Privately manage a block list for websites",
     "manifest_version": 3,
     "permissions": [
         "activeTab",
+        "tabs",
         "storage",
         "webNavigation",
         "scripting"
