@@ -1,10 +1,4 @@
-const blockList = {
-    "facebook.com": "They continuously push propaganda, and even if they were decent human beings - they are a huge time waster.",
-    "instagram.com": "You just mindlessly scroll, and this produces no meaning or value",
-};
-
-function generateBlockHtml(url) {
-    const message = blockList[url];
+function generateBlockHtml(url, message) {
     return `
     <html>
     <body style="background-color: black; color: white;">
@@ -21,30 +15,15 @@ function generateBlockHtml(url) {
     `;
 }
 
-function checkAndBlockSites() {
-    if (!window.blockListEnabled) {
-        return;
-    }
-
-    Object.keys(blockList).forEach(url => {
-        if (document.URL.includes(url)) {
-            const generatedHtml = generateBlockHtml(url);
-            document.open();
-            document.write(generatedHtml);
-            document.close();
-        }
-    });
+function blockUrl({ url, message }) {
+    const generatedHtml = generateBlockHtml(url, message);
+    document.open();
+    document.write(generatedHtml);
+    document.close();
 }
 
-chrome.storage.local.get('blockListEnabled', function(result) {
-    window.blockListEnabled = result.blockListEnabled || false;
-    checkAndBlockSites();
-});
-
 chrome.runtime.onMessage.addListener(function(request) {
-    if (request.action === 'updateFeatureState') {
-        window.blockListEnabled = request.blockListEnabled;
-        checkAndBlockSites();
+    if (request.action === "block-url") {
+        blockUrl(request);
     }
 });
-

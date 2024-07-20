@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="searchContainer">
+            <input class="searchInput" type="text" placeholder="Search" id="searchBox" />
+            <button id="power-button" class="toggle-button">
+                <span class="power-icon">&#x23FB;</span>
+            </button>
+        </div>
+        <div class="tableWrapper">
+            <table id="dataTable">
+                <thead>
+                    <tr>
+                        <th>
+                            URL
+                        </th>
+                        <th>
+                            Message
+                        </th>
+                        <th style="text-align: right;">
+                            <a href="#" class="add-button" id="add-button-link">
+                                <i class="label">+</i>
+                            </a>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"> </tbody>
+            </table>
+        </div>
+        <ul id="instructionsContainer"> </ul>
+    </div>
+    <script src="popup.js"></script>
+</body>
+
+</html>

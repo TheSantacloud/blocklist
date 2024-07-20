@@ -1,42 +1,42 @@
 chrome.runtime.onInstalled.addListener(function() {
-    chrome.storage.local.set({ blockListEnabled: true });
+    chrome.storage.sync.set({ blockListEnabled: true });
 });
 
-chrome.action.onClicked.addListener(() => {
-    chrome.storage.local.get('blockListEnabled', (data) => {
-        const newState = !data.blockListEnabled;
-        chrome.storage.local.set({ blockListEnabled: newState }, () => {
-            updateIcon(newState);
-        });
-    });
-});
-
-function updateIcon(state) {
-    const iconPath = state ? 'assets/icon_color_128.png' : 'assets/icon_gray_128.png';
-    chrome.action.setIcon({ path: iconPath });
-}
-
-chrome.runtime.onStartup.addListener(() => {
-    chrome.storage.local.get('blockListEnabled', (data) => {
-        updateIcon(data.blockListEnabled);
-    });
-});
-
-chrome.storage.onChanged.addListener((changes, namespace) => {
-    for (let [key] of Object.entries(changes)) {
-        if (key === "blockListEnabled") {
-            chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-                chrome.tabs.reload(tabs[0].id);
+chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
+    const currentUrl = details.url;
+    const tabId = details.tabId;
+    chrome.storage.sync.get("blockList", (data) => {
+        for (let blockUrl in data.blockList) {
+            if (!currentUrl.includes(blockUrl)) continue;
+            chrome.storage.sync.get("blockListEnabled", (enabled) => {
+                if (!enabled.blockListEnabled) return;
+                chrome.tabs.sendMessage(tabId, {
+                    action: "block-url",
+                    url: blockUrl,
+                    message: data.blockList[blockUrl].desc
+                });
             });
         }
+    });
+});
+
+chrome.storage.onChanged.addListener((changes) => {
+    for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+        if (key === "blockListEnabled" && oldValue === newValue) continue;
+        chrome.storage.sync.get("blockList", (data) => {
+            chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+                for (let blockUrl in data.blockList) {
+                    if (!tabs[0].url.includes(blockUrl)) continue;
+                    chrome.tabs.reload(tabs[0].id);
+                }
+            });
+        });
     }
 });
 
 chrome.commands.onCommand.addListener(async (command) => {
     if (command === "enable_blocklist") {
-        chrome.storage.local.set({ blockListEnabled: true }, () => {
-            updateIcon(true);
-        });
+        chrome.storage.sync.set({ blockListEnabled: true });
     } else {
         console.error("unknown command");
     }

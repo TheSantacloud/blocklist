@@ -1,24 +1,21 @@
 {
     "name": "blocklist",
-    "version": "0.2.0",
+    "version": "1.0.0",
     "description": "Privately manage a block list for websites",
     "manifest_version": 3,
     "permissions": [
         "activeTab",
         "storage",
+        "webNavigation",
         "scripting"
     ],
     "action": {
-        "default_icon": {
-            "16": "assets/icon_gray_128.png",
-            "48": "assets/icon_gray_128.png",
-            "128": "assets/icon_gray_128.png"
-        }
+        "default_popup": "popup.html"
     },
     "icons": {
-        "16": "assets/icon_gray_128.png",
-        "48": "assets/icon_gray_128.png",
-        "128": "assets/icon_gray_128.png"
+        "16": "assets/icon_color_128.png",
+        "48": "assets/icon_color_128.png",
+        "128": "assets/icon_color_128.png"
     },
     "background": {
         "service_worker": "background.js"
@@ -29,7 +26,7 @@
                 "default": "Ctrl+Shift+B",
                 "mac": "MacCtrl+Shift+B"
             },
-            "description": "Enable Blocklist"
+            "description": "Block sites"
         }
     },
     "content_scripts": [
