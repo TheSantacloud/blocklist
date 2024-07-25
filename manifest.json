@@ -1,6 +1,6 @@
 {
     "name": "blocklist",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Privately manage a block list for websites",
     "manifest_version": 3,
     "permissions": [

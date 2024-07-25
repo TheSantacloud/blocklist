@@ -81,6 +81,18 @@ function toggleEditMode(tr, fullEditMode) {
                 event.preventDefault();
                 saveRow(tr);
             }
+            else if (event.key === 'Escape') {
+                event.preventDefault();
+                child.style = "";
+                child.contentEditable = false;
+            }
+        });
+
+        document.addEventListener('click', event => {
+            if (event.target.classList !== child.classList) {
+                child.style = "";
+                child.contentEditable = false;
+            }
         });
         desc.focus();
     }
@@ -154,6 +166,7 @@ function populateInstructions() {
             if (!description) {
                 return;
             }
+
             instruction.innerHTML = `<span class="description">${description}</span><span class="shortcut">${command.shortcut}</span>`;
             instructionsContainer.appendChild(instruction);
         });
@@ -186,12 +199,6 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleEditMode(tr, true);
     });
 
-    document.addEventListener('keydown', (event) => {
-        if (event.event === "Escape") {
-            window.close();
-        }
-    });
-
     populateInstructions();
 
     chrome.storage.sync.get("blockList", (data) => {
@@ -200,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         populateTable(blockList);
     });
+
 });
 
 
