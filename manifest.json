@@ -1,6 +1,6 @@
 {
     "name": "blocklist",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "Privately manage a block list for websites",
     "manifest_version": 3,
     "permissions": [
@@ -8,7 +8,8 @@
         "tabs",
         "storage",
         "webNavigation",
-        "scripting"
+        "scripting",
+        "background"
     ],
     "action": {
         "default_popup": "popup.html"

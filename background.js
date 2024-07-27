@@ -3,12 +3,16 @@ chrome.runtime.onInstalled.addListener(function() {
 });
 
 chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
-    blockIfNeeded(details.tabId, details.url)
+    blockIfNeeded(details.tabId, details.url);
 });
 
 chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
-    if (!tab.url) return;
-    blockIfNeeded(tabId, tab.url)
+    blockIfNeeded(tabId, tab.url);
+})
+
+chrome.tabs.onActivated.addListener(async function(activeInfo) {
+    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    blockIfNeeded(tab.id, tab.url);
 })
 
 function blockIfNeeded(tabId, currentUrl) {
