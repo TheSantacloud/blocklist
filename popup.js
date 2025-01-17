@@ -256,6 +256,7 @@ function loadTimeoutInput() {
         if (checkbox.checked) {
             input.classList.remove("hidden");
             timeoutContainer.classList.add("active");
+            chrome.storage.sync.set({ timeoutValue: input.value ? input.value : -1 });
         } else {
             input.classList.add("hidden");
             timeoutContainer.classList.remove("active");

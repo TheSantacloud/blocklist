@@ -5,40 +5,31 @@ chrome.runtime.onInstalled.addListener(function() {
 });
 
 chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
+    console.log("onhistorystateupdated");
     blockIfNeeded(details.tabId, details.url);
 });
 
 chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
+    console.log("onupdated");
     blockIfNeeded(tabId, tab.url);
 })
 
 chrome.tabs.onActivated.addListener(async function(activeInfo) {
     const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+    console.log("onactivated");
     blockIfNeeded(tab.id, tab.url);
 })
 
 async function blockIfNeeded(tabId, currentUrl) {
-    const { blockList, blockListEnabled, timestamp, timeoutValue } = await chrome.storage.sync.get([
+    const { blockList, blockListEnabled } = await chrome.storage.sync.get([
         "blockList",
         "blockListEnabled",
-        "timestamp",
-        "timeoutValue",
     ]);
 
     const blockUrl = shouldBlockUrl(currentUrl, blockList);
     if (!blockUrl) return;
 
     if (blockListEnabled) {
-        chrome.tabs.sendMessage(tabId, {
-            action: "block-url",
-            url: blockUrl,
-            message: blockList[blockUrl].desc
-        });
-    } else {
-        const now = Date.now();
-        const elapsed = now - timestamp;
-        const timeout = timeoutValue * 60 * 1000;
-        if (timeout >= 0 && elapsed < timeout) return;
         chrome.tabs.sendMessage(tabId, {
             action: "block-url",
             url: blockUrl,
@@ -58,7 +49,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
     if (area !== 'sync') return;
 
     if ('blockListEnabled' in changes) {
-        if (blocklistTimer) {
+        if (blocklistTimer > 0) {
             clearTimeout(blocklistTimer);
             blocklistTimer = null;
         }
@@ -76,10 +67,12 @@ chrome.storage.onChanged.addListener((changes, area) => {
     }
 
     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+        if (key !== "blockListEnabled") continue;
         if (key === "blockListEnabled" && oldValue === newValue) continue;
 
         chrome.storage.sync.get("blockList", (data) => {
-            chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            chrome.tabs.query({ active: true, currentWindow: true, windowType: 'normal' }, function(tabs) {
+                if (!tabs.length) return;
                 for (let blockUrl in data.blockList) {
                     if (!tabs[0].url.includes(blockUrl)) continue;
                     chrome.tabs.reload(tabs[0].id);
