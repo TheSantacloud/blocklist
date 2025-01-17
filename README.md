@@ -2,6 +2,8 @@
 
 A lightweight, private, no nonesense, local website blocker.
 
+![Screenshot of the popup][assets/blocklist.png]
+
 ## Features:
 
 - **Quick toggle** - Enable via popup or shortcut (default: Ctrl-Shift-B)
