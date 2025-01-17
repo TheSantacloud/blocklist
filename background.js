@@ -37,7 +37,7 @@ async function blockIfNeeded(tabId, currentUrl) {
     } else {
         const now = Date.now();
         const elapsed = now - timestamp;
-        const timeout = timeoutValue * 1000; // to seconds
+        const timeout = timeoutValue * 60 * 1000;
         if (timeout >= 0 && elapsed < timeout) return;
         chrome.tabs.sendMessage(tabId, {
             action: "block-url",
@@ -69,7 +69,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
                 if (data.timeoutValue > 0) {
                     blocklistTimer = setTimeout(() => {
                         chrome.storage.sync.set({ blockListEnabled: true });
-                    }, data.timeoutValue * 1000);
+                    }, data.timeoutValue * 60 * 1000);
                 }
             });
         }

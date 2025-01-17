@@ -272,3 +272,70 @@ a:hover {
     color: white;
     font-size: 2.5em;
 }
+
+.timedToggleContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5em;
+    margin: 1em;
+    background-color: #202020;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.5em;
+    transition: background-color 0.3s ease;
+}
+
+.timedToggleContainer.active {
+    background-color: #2A0000;
+    border: 1px solid rgba(255, 0, 0, 0.5);
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+}
+
+.timedToggleContainer label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    gap: 0.5em;
+}
+
+#timedCheckbox {
+    transform: scale(1);
+    accent-color: rgba(255, 0, 0, 0.75);
+    cursor: pointer;
+    margin-right: 0.5em;
+}
+
+#timedCheckbox+label {
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.9em;
+    margin-right: auto;
+}
+
+#timeoutInput {
+    width: 4em;
+    padding: 0.4em;
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.3em;
+    color: white;
+    font-size: 0.9em;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+#timeoutInput.hidden {
+    visibility: hidden;
+}
+
+#timeoutInput:focus {
+    outline: none;
+    border-color: rgba(255, 0, 0, 0.6);
+}
+
+#timeoutInput::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}

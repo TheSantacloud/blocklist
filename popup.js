@@ -237,22 +237,29 @@ function switchBlocklist(state) {
 function loadTimeoutInput() {
     const checkbox = document.getElementById('timedCheckbox');
     const input = document.getElementById('timeoutInput');
+    const timeoutContainer = document.querySelector('.timedToggleContainer');
+
     chrome.storage.sync.get("timeoutValue", (data) => {
         if (data.timeoutValue > 0) {
             input.value = data.timeoutValue;
-            input.style.display = "inline";
+            input.classList.remove("hidden");
             checkbox.checked = true;
+            timeoutContainer.classList.add("active");
             return;
         }
         checkbox.checked = false;
-        input.style.display = "none";
+        input.classList.add("hidden");
+        timeoutContainer.classList.remove("active");
     });
 
     checkbox.addEventListener('change', () => {
         if (checkbox.checked) {
-            input.style = "display: inline;";
+            input.classList.remove("hidden");
+            timeoutContainer.classList.add("active");
         } else {
-            input.style = "display: none;";
+            input.classList.add("hidden");
+            timeoutContainer.classList.remove("active");
+            chrome.storage.sync.set({ timeoutValue: -1 });
         }
     });
 
@@ -262,4 +269,3 @@ function loadTimeoutInput() {
         chrome.storage.sync.set({ timeoutValue: value });
     });
 }
-
