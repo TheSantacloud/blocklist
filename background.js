@@ -5,19 +5,12 @@ chrome.runtime.onInstalled.addListener(function() {
 });
 
 chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
-    console.log("onhistorystateupdated");
     blockIfNeeded(details.tabId, details.url);
 });
 
 chrome.tabs.onUpdated.addListener(async function(tabId, changeInfo, tab) {
-    console.log("onupdated");
+    if (changeInfo.status !== "complete") return;
     blockIfNeeded(tabId, tab.url);
-})
-
-chrome.tabs.onActivated.addListener(async function(activeInfo) {
-    const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-    console.log("onactivated");
-    blockIfNeeded(tab.id, tab.url);
 })
 
 async function blockIfNeeded(tabId, currentUrl) {
@@ -26,16 +19,22 @@ async function blockIfNeeded(tabId, currentUrl) {
         "blockListEnabled",
     ]);
 
+    if (!blockListEnabled) return;
+
     const blockUrl = shouldBlockUrl(currentUrl, blockList);
     if (!blockUrl) return;
 
-    if (blockListEnabled) {
-        chrome.tabs.sendMessage(tabId, {
-            action: "block-url",
-            url: blockUrl,
-            message: blockList[blockUrl].desc
-        });
-    }
+    chrome.tabs.sendMessage(tabId, {
+        action: "block-url",
+        url: blockUrl,
+        message: blockList[blockUrl].desc
+    }, () => {
+        if (chrome.runtime.lastError && chrome.runtime.lastError.message) {
+            if (!chrome.runtime.lastError.message.includes("message port closed")) {
+                console.warn(chrome.runtime.lastError.message);
+            }
+        }
+    });
 }
 
 function shouldBlockUrl(url, blockList) {
