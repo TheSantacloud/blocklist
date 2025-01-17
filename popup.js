@@ -1,5 +1,48 @@
 let blockList = {};
 
+document.addEventListener('DOMContentLoaded', () => {
+    const searchBox = document.getElementById('searchBox');
+    searchBox.addEventListener('input', (event) => searchData(event.target.value));
+
+    const powerButton = document.getElementById("power-button");
+    chrome.storage.sync.get("blockListEnabled", (data) => {
+        if (data.blockListEnabled) {
+            powerButton.classList.add("active");
+        }
+    });
+    powerButton.addEventListener("click", toggleBlocklist);
+
+    const addButton = document.getElementById('add-button-link');
+    addButton.addEventListener('click', () => {
+        const tr = createTableRow("", { desc: "" });
+        const tableBody = document.getElementById('tableBody');
+        tableBody.appendChild(tr);
+        toggleEditMode(tr, true);
+    });
+
+    populateInstructions();
+    loadTimeoutInput();
+
+    chrome.storage.sync.get("blockList", (data) => {
+        if (data.blockList) {
+            blockList = data["blockList"];
+        }
+        populateTable(blockList);
+    });
+
+});
+
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'sync' && changes.blockListEnabled) {
+        const powerButton = document.getElementById("power-button");
+        if (changes.blockListEnabled.newValue) {
+            powerButton.classList.add("active");
+        } else {
+            powerButton.classList.remove("active");
+        }
+    }
+});
+
 function createTableRow(url, { desc }) {
     const tr = document.createElement('tr');
 
@@ -175,10 +218,21 @@ function populateInstructions() {
 
 function toggleBlocklist() {
     const powerButton = document.getElementById("power-button");
-    powerButton.classList.toggle("active");
-    const timestamp = Date.now();
-    chrome.storage.sync.set({ blockListEnabled: powerButton.classList.contains("active"), timestamp: timestamp });
+    const desiredState = !powerButton.classList.contains("active");
+    switchBlocklist(desiredState);
 }
+
+function switchBlocklist(state) {
+    const powerButton = document.getElementById("power-button");
+    if (state) {
+        powerButton.classList.add("active");
+    } else {
+        powerButton.classList.remove("active");
+    }
+    const timestamp = Date.now();
+    chrome.storage.sync.set({ blockListEnabled: state, timestamp: timestamp });
+}
+
 
 function loadTimeoutInput() {
     const checkbox = document.getElementById('timedCheckbox');
@@ -208,38 +262,4 @@ function loadTimeoutInput() {
         chrome.storage.sync.set({ timeoutValue: value });
     });
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    const searchBox = document.getElementById('searchBox');
-    searchBox.addEventListener('input', (event) => searchData(event.target.value));
-
-    const powerButton = document.getElementById("power-button");
-    chrome.storage.sync.get("blockListEnabled", (data) => {
-        if (data.blockListEnabled) {
-            powerButton.classList.add("active");
-        }
-    });
-    powerButton.addEventListener("click", toggleBlocklist);
-
-    const addButton = document.getElementById('add-button-link');
-    addButton.addEventListener('click', () => {
-        const tr = createTableRow("", { desc: "" });
-        const tableBody = document.getElementById('tableBody');
-        tableBody.appendChild(tr);
-        toggleEditMode(tr, true);
-    });
-
-    populateInstructions();
-    loadTimeoutInput();
-
-    chrome.storage.sync.get("blockList", (data) => {
-        if (data.blockList) {
-            blockList = data["blockList"];
-        }
-        populateTable(blockList);
-    });
-
-});
-
-
 

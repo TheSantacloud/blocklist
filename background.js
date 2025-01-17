@@ -1,3 +1,5 @@
+let blocklistTimer = null;
+
 chrome.runtime.onInstalled.addListener(function() {
     chrome.storage.sync.set({ blockListEnabled: true, timestamp: Date.now() });
 });
@@ -52,9 +54,30 @@ function shouldBlockUrl(url, blockList) {
     return null;
 }
 
-chrome.storage.onChanged.addListener((changes) => {
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'sync') return;
+
+    if ('blockListEnabled' in changes) {
+        if (blocklistTimer) {
+            clearTimeout(blocklistTimer);
+            blocklistTimer = null;
+        }
+
+        const isEnabled = changes.blockListEnabled.newValue;
+        if (isEnabled === false) {
+            chrome.storage.sync.get('timeoutValue', (data) => {
+                if (data.timeoutValue > 0) {
+                    blocklistTimer = setTimeout(() => {
+                        chrome.storage.sync.set({ blockListEnabled: true });
+                    }, data.timeoutValue * 1000);
+                }
+            });
+        }
+    }
+
     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
         if (key === "blockListEnabled" && oldValue === newValue) continue;
+
         chrome.storage.sync.get("blockList", (data) => {
             chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
                 for (let blockUrl in data.blockList) {
