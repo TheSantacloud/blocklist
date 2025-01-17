@@ -35,9 +35,17 @@
                 <tbody id="tableBody"> </tbody>
             </table>
         </div>
-        <ul id="instructionsContainer"> </ul>
-    </div>
-    <script src="popup.js"></script>
+        <div class="timedToggleContainer">
+            <label>
+                <input type="checkbox" id="timedCheckbox">
+                Set a timeout (in minutes)
+            </label>
+            <input type="number" id="timeoutInput" placeholder="Enter minutes" style="display: none;" min="1" />
+        </div>
+        <div id="instruction">
+            <ul id="instructionsContainer"> </ul>
+        </div </div>
+        <script src="popup.js"></script>
 </body>
 
 </html>

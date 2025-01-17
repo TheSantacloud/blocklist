@@ -176,7 +176,37 @@ function populateInstructions() {
 function toggleBlocklist() {
     const powerButton = document.getElementById("power-button");
     powerButton.classList.toggle("active");
-    chrome.storage.sync.set({ blockListEnabled: powerButton.classList.contains("active") });
+    const timestamp = Date.now();
+    chrome.storage.sync.set({ blockListEnabled: powerButton.classList.contains("active"), timestamp: timestamp });
+}
+
+function loadTimeoutInput() {
+    const checkbox = document.getElementById('timedCheckbox');
+    const input = document.getElementById('timeoutInput');
+    chrome.storage.sync.get("timeoutValue", (data) => {
+        if (data.timeoutValue > 0) {
+            input.value = data.timeoutValue;
+            input.style.display = "inline";
+            checkbox.checked = true;
+            return;
+        }
+        checkbox.checked = false;
+        input.style.display = "none";
+    });
+
+    checkbox.addEventListener('change', () => {
+        if (checkbox.checked) {
+            input.style = "display: inline;";
+        } else {
+            input.style = "display: none;";
+        }
+    });
+
+    input.addEventListener('change', () => {
+        let value = input.value;
+        if (checkbox.checked == false) value = -1;
+        chrome.storage.sync.set({ timeoutValue: value });
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -200,6 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     populateInstructions();
+    loadTimeoutInput();
 
     chrome.storage.sync.get("blockList", (data) => {
         if (data.blockList) {

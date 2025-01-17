@@ -1,5 +1,5 @@
 chrome.runtime.onInstalled.addListener(function() {
-    chrome.storage.sync.set({ blockListEnabled: true });
+    chrome.storage.sync.set({ blockListEnabled: true, timestamp: Date.now() });
 });
 
 chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
@@ -15,20 +15,41 @@ chrome.tabs.onActivated.addListener(async function(activeInfo) {
     blockIfNeeded(tab.id, tab.url);
 })
 
-function blockIfNeeded(tabId, currentUrl) {
-    chrome.storage.sync.get("blockList", (data) => {
-        for (let blockUrl in data.blockList) {
-            if (!currentUrl.includes(blockUrl)) continue;
-            chrome.storage.sync.get("blockListEnabled", (enabled) => {
-                if (!enabled.blockListEnabled) return;
-                chrome.tabs.sendMessage(tabId, {
-                    action: "block-url",
-                    url: blockUrl,
-                    message: data.blockList[blockUrl].desc
-                });
-            });
-        }
-    });
+async function blockIfNeeded(tabId, currentUrl) {
+    const { blockList, blockListEnabled, timestamp, timeoutValue } = await chrome.storage.sync.get([
+        "blockList",
+        "blockListEnabled",
+        "timestamp",
+        "timeoutValue",
+    ]);
+
+    const blockUrl = shouldBlockUrl(currentUrl, blockList);
+    if (!blockUrl) return;
+
+    if (blockListEnabled) {
+        chrome.tabs.sendMessage(tabId, {
+            action: "block-url",
+            url: blockUrl,
+            message: blockList[blockUrl].desc
+        });
+    } else {
+        const now = Date.now();
+        const elapsed = now - timestamp;
+        const timeout = timeoutValue * 1000; // to seconds
+        if (timeout >= 0 && elapsed < timeout) return;
+        chrome.tabs.sendMessage(tabId, {
+            action: "block-url",
+            url: blockUrl,
+            message: blockList[blockUrl].desc
+        });
+    }
+}
+
+function shouldBlockUrl(url, blockList) {
+    for (let blockUrl in blockList) {
+        if (url.includes(blockUrl)) return blockUrl;
+    }
+    return null;
 }
 
 chrome.storage.onChanged.addListener((changes) => {
@@ -47,7 +68,7 @@ chrome.storage.onChanged.addListener((changes) => {
 
 chrome.commands.onCommand.addListener(async (command) => {
     if (command === "enable_blocklist") {
-        chrome.storage.sync.set({ blockListEnabled: true });
+        chrome.storage.sync.set({ blockListEnabled: true, timestamp: Date.now() });
     } else {
         console.error("unknown command");
     }

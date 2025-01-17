@@ -27,3 +27,4 @@ chrome.runtime.onMessage.addListener(function(request) {
         blockUrl(request);
     }
 });
+
