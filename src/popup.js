@@ -100,6 +100,7 @@ function toggleEditMode(tr, fullEditMode) {
             url.innerHTML = `<input type="text" value=${domain} style="width: 100%; box-sizing: border-box;"/>`
             desc.innerHTML = `<input type="text" value="${desc.children[0].innerText}" style="width: 100%; box-sizing: border-box;"/>`;
             url.children[0].focus();
+            url.children[0].select();
             url.addEventListener('keydown', event => {
                 if (event.key === 'Enter') desc.children[0].focus();
             });

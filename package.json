@@ -1,0 +1,10 @@
+{
+    "devDependencies": {
+        "@crxjs/vite-plugin": "^2.0.0-beta.30",
+        "vite": "^6.0.11"
+    },
+    "scripts": {
+        "dev": "vite build --watch --debug -m dev",
+        "build": "vite build"
+    }
+}

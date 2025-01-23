@@ -1,8 +1,10 @@
 # Blocklist
 
+## Discontinued! Using Raycast Focus
+
 A lightweight, private, no nonesense, local website blocker.
 
-![screenshot](assets/blocklist.png)
+![screenshot](blocklist.png)
 
 ## Features:
 

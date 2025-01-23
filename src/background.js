@@ -84,6 +84,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
 chrome.commands.onCommand.addListener(async (command) => {
     if (command === "enable_blocklist") {
         chrome.storage.sync.set({ blockListEnabled: true, timestamp: Date.now() });
+        console.log("TEST0");
     } else {
         console.error("unknown command");
     }

@@ -20,7 +20,8 @@
         "128": "assets/icon_color_128.png"
     },
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "background.js",
+        "type": "module"
     },
     "commands": {
         "enable_blocklist": {
