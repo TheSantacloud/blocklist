@@ -1,6 +1,6 @@
 {
     "name": "blocklist",
-    "version": "1.1.0",
+    "version": "1.2.1",
     "description": "Privately manage a block list for websites",
     "manifest_version": 3,
     "permissions": [
@@ -65,8 +65,13 @@
     ],
     "web_accessible_resources": [
         {
-            "resources": ["assets/icon_color_128.png"],
-            "matches": ["*://www.youtube.com/*", "*://youtube.com/*"]
+            "resources": [
+                "assets/icon_color_128.png"
+            ],
+            "matches": [
+                "*://www.youtube.com/*",
+                "*://youtube.com/*"
+            ]
         }
     ]
 }

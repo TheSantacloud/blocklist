@@ -60,12 +60,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.classList.remove('added');
                 updateStorageBlocklist();
             } else {
-                const tr = createTableRow(url, { desc: getRandomReason() });
-                tr.dataset.isPreset = 'true';
-                const tableBody = document.getElementById('tableBody');
-                tableBody.appendChild(tr);
+                const desc = getRandomReason();
+                blockList[url] = { desc };
+                updateStorageBlocklist();
                 btn.classList.add('added');
-                toggleEditMode(tr, false, true);
+                const tr = [...document.querySelectorAll('tr')].find(r => r.querySelector('.url-col span')?.textContent === url);
+                if (tr) toggleEditMode(tr, false);
             }
         });
     });
