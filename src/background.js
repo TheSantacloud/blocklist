@@ -58,23 +58,27 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== "sync") return;
 
   if ("blockListEnabled" in changes) {
-    if (blocklistTimer > 0) {
+    if (blocklistTimer) {
       clearTimeout(blocklistTimer);
       blocklistTimer = null;
     }
 
     const isEnabled = changes.blockListEnabled.newValue;
     if (isEnabled === false) {
-      chrome.storage.sync.get("timeoutValue", (data) => {
-        if (data.timeoutValue > 0) {
-          blocklistTimer = setTimeout(
-            () => {
-              chrome.storage.sync.set({ blockListEnabled: true });
-            },
-            data.timeoutValue * 60 * 1000,
-          );
-        }
+      chrome.storage.sync.get(["breakMinutes", "breakEnabled"], (data) => {
+        if (!data.breakEnabled) return;
+        const minutes = data.breakMinutes || 5;
+        const endTime = Date.now() + minutes * 60 * 1000;
+        chrome.storage.sync.set({ breakEndTime: endTime });
+        blocklistTimer = setTimeout(
+          () => {
+            chrome.storage.sync.set({ blockListEnabled: true, breakEndTime: null });
+          },
+          minutes * 60 * 1000,
+        );
       });
+    } else {
+      chrome.storage.sync.set({ breakEndTime: null });
     }
   }
 

@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     populateInstructions();
-    loadTimeoutInput();
+    loadBreakFeature();
     loadYoutubeMinimalToggle();
     loadInstagramMinimalToggle();
 
@@ -309,40 +309,171 @@ function switchBlocklist(state) {
 }
 
 
-function loadTimeoutInput() {
-    const checkbox = document.getElementById('timedCheckbox');
-    const input = document.getElementById('timeoutInput');
-    const timeoutContainer = document.querySelector('.timedToggleContainer');
+let breakInterval = null;
 
-    chrome.storage.sync.get("timeoutValue", (data) => {
-        if (data.timeoutValue > 0) {
-            input.value = data.timeoutValue;
-            input.classList.remove("hidden");
-            checkbox.checked = true;
-            timeoutContainer.classList.add("active");
-            return;
+const MIN_MINUTES = 1;
+const MAX_MINUTES = 60;
+
+function minutesToSlider(minutes) {
+    const minLog = Math.log(MIN_MINUTES);
+    const maxLog = Math.log(MAX_MINUTES);
+    return ((Math.log(minutes) - minLog) / (maxLog - minLog)) * 100;
+}
+
+const SNAP_VALUES = [1, 5, 15, 30, 60];
+const SNAP_THRESHOLD = 3;
+
+function sliderToMinutes(sliderValue) {
+    for (const snap of SNAP_VALUES) {
+        const snapPos = minutesToSlider(snap);
+        if (Math.abs(sliderValue - snapPos) < SNAP_THRESHOLD) {
+            return snap;
         }
-        checkbox.checked = false;
-        input.classList.add("hidden");
-        timeoutContainer.classList.remove("active");
+    }
+    const minLog = Math.log(MIN_MINUTES);
+    const maxLog = Math.log(MAX_MINUTES);
+    const value = Math.exp(minLog + (sliderValue / 100) * (maxLog - minLog));
+    return Math.round(value);
+}
+
+function loadBreakFeature() {
+    const container = document.querySelector('.breakContainer');
+    const header = container.querySelector('.breakHeader');
+    const editMode = container.querySelector('.breakEditMode');
+    const progressView = container.querySelector('.breakProgress');
+    const breakMinutesSpan = document.getElementById('breakMinutes');
+    const breakCheckbox = document.getElementById('breakCheckbox');
+    const editBtn = document.getElementById('breakEditBtn');
+    const saveBtn = document.getElementById('breakSaveBtn');
+    const breakInput = document.getElementById('breakInput');
+    const breakRange = document.getElementById('breakRange');
+    const breakTicks = container.querySelectorAll('.breakTicks span');
+    const progressFill = container.querySelector('.breakProgressFill');
+    const timeRemaining = container.querySelector('.breakTimeRemaining');
+
+    chrome.storage.sync.get(["breakMinutes", "breakEnabled", "breakEndTime"], (data) => {
+        const minutes = data.breakMinutes || 5;
+        breakMinutesSpan.textContent = minutes;
+        breakInput.value = minutes;
+        breakRange.value = minutesToSlider(minutes);
+
+        if (data.breakEnabled) {
+            breakCheckbox.checked = true;
+            container.classList.add('active');
+            editBtn.classList.remove('hidden');
+        }
+
+        if (data.breakEndTime && data.breakEndTime > Date.now()) {
+            showProgressView(data.breakEndTime);
+        }
     });
 
-    checkbox.addEventListener('change', () => {
-        if (checkbox.checked) {
-            input.classList.remove("hidden");
-            timeoutContainer.classList.add("active");
-            chrome.storage.sync.set({ timeoutValue: input.value ? input.value : -1 });
+    breakCheckbox.addEventListener('change', () => {
+        const enabled = breakCheckbox.checked;
+        chrome.storage.sync.set({ breakEnabled: enabled });
+        if (enabled) {
+            container.classList.add('active');
+            editBtn.classList.remove('hidden');
         } else {
-            input.classList.add("hidden");
-            timeoutContainer.classList.remove("active");
-            chrome.storage.sync.set({ timeoutValue: -1 });
+            container.classList.remove('active');
+            editBtn.classList.add('hidden');
+            editMode.classList.add('hidden');
         }
     });
 
-    input.addEventListener('change', () => {
-        let value = input.value;
-        if (checkbox.checked == false) value = -1;
-        chrome.storage.sync.set({ timeoutValue: value });
+    editBtn.addEventListener('click', () => {
+        header.classList.add('hidden');
+        editMode.classList.remove('hidden');
+        breakInput.focus();
+        breakInput.select();
+    });
+
+    breakRange.addEventListener('input', () => {
+        const minutes = sliderToMinutes(breakRange.value);
+        breakInput.value = minutes;
+        breakRange.value = minutesToSlider(minutes);
+    });
+
+    breakInput.addEventListener('input', () => {
+        const val = Math.min(MAX_MINUTES, Math.max(MIN_MINUTES, parseInt(breakInput.value) || MIN_MINUTES));
+        breakRange.value = minutesToSlider(val);
+    });
+
+    breakTicks.forEach(tick => {
+        tick.addEventListener('click', () => {
+            const value = parseInt(tick.dataset.value);
+            breakInput.value = value;
+            breakRange.value = minutesToSlider(value);
+        });
+    });
+
+    saveBtn.addEventListener('click', saveBreakMinutes);
+    breakInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') saveBreakMinutes();
+    });
+
+    function saveBreakMinutes() {
+        const value = Math.max(1, parseInt(breakInput.value) || 5);
+        breakMinutesSpan.textContent = value;
+        chrome.storage.sync.set({ breakMinutes: value });
+        editMode.classList.add('hidden');
+        header.classList.remove('hidden');
+    }
+
+    function showProgressView(endTime) {
+        header.classList.add('hidden');
+        editMode.classList.add('hidden');
+        progressView.classList.remove('hidden');
+        container.classList.add('active');
+
+        chrome.storage.sync.get("breakMinutes", (data) => {
+            const totalMs = (data.breakMinutes || 5) * 60 * 1000;
+            updateProgress();
+
+            if (breakInterval) clearInterval(breakInterval);
+            breakInterval = setInterval(updateProgress, 500);
+
+            function updateProgress() {
+                const now = Date.now();
+                const remaining = endTime - now;
+
+                if (remaining <= 0) {
+                    clearInterval(breakInterval);
+                    breakInterval = null;
+                    hideProgressView();
+                    return;
+                }
+
+                const percent = (remaining / totalMs) * 100;
+                progressFill.style.width = `${Math.max(0, percent)}%`;
+
+                const mins = Math.floor(remaining / 60000);
+                const secs = Math.floor((remaining % 60000) / 1000);
+                timeRemaining.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+        });
+    }
+
+    function hideProgressView() {
+        progressView.classList.add('hidden');
+        header.classList.remove('hidden');
+    }
+
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== 'sync') return;
+
+        if (changes.breakEndTime) {
+            const endTime = changes.breakEndTime.newValue;
+            if (endTime && endTime > Date.now()) {
+                showProgressView(endTime);
+            } else {
+                if (breakInterval) {
+                    clearInterval(breakInterval);
+                    breakInterval = null;
+                }
+                hideProgressView();
+            }
+        }
     });
 }
 

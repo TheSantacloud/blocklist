@@ -43,12 +43,36 @@
                 <tbody id="tableBody"> </tbody>
             </table>
         </div>
-        <div class="timedToggleContainer">
-            <input type="checkbox" id="timedCheckbox">
-            <label for="timedCheckbox">
-                Set Timeout (in minutes)
-            </label>
-            <input type="number" id="timeoutInput" placeholder="mins" min="1" class="hidden" />
+        <div class="breakContainer">
+            <div class="breakHeader">
+                <input type="checkbox" id="breakCheckbox">
+                <label for="breakCheckbox">
+                    <span class="breakLabelText">Break Timeout (<span id="breakMinutes">5</span>m)</span>
+                    <span class="tooltip">Auto re-enables blocking after the break ends</span>
+                </label>
+                <button id="breakEditBtn" class="break-edit-btn hidden">&#x270E;</button>
+            </div>
+            <div class="breakEditMode hidden">
+                <div class="breakSliderWrapper">
+                    <input type="range" id="breakRange" min="0" max="100" value="37" />
+                    <div class="breakTicks">
+                        <span data-value="1">1</span>
+                        <span data-value="5">5</span>
+                        <span data-value="15">15</span>
+                        <span data-value="30">30</span>
+                        <span data-value="60">60</span>
+                    </div>
+                </div>
+                <input type="number" id="breakInput" min="1" max="60" value="5" />
+                <span class="breakInputUnit">m</span>
+                <button id="breakSaveBtn" class="break-save-btn">&#x2713;</button>
+            </div>
+            <div class="breakProgress hidden">
+                <div class="breakProgressBar">
+                    <div class="breakProgressFill"></div>
+                </div>
+                <span class="breakTimeRemaining"></span>
+            </div>
         </div>
         <div class="youtubeMinimalContainer">
             <input type="checkbox" id="youtubeMinimalCheckbox">

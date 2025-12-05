@@ -371,10 +371,10 @@ a:hover {
     font-size: 2.5em;
 }
 
-.timedToggleContainer {
+.breakContainer {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
     padding: 0.5em;
     margin: 1em;
     background-color: #202020;
@@ -383,59 +383,210 @@ a:hover {
     transition: background-color 0.3s ease;
 }
 
-.timedToggleContainer.active {
+.breakContainer.active {
     background-color: #2A0000;
     border: 1px solid rgba(255, 0, 0, 0.5);
     box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
 }
 
-.timedToggleContainer label {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9em;
+.breakHeader {
     display: flex;
     align-items: center;
-    margin: 0;
-    gap: 0.5em;
+    width: 100%;
 }
 
-#timedCheckbox {
-    transform: scale(1);
+.breakHeader.hidden {
+    display: none;
+}
+
+#breakCheckbox {
+    width: 1.2em;
+    height: 1.2em;
     accent-color: rgba(255, 0, 0, 0.75);
     cursor: pointer;
-    margin-right: 0.5em;
+    margin-right: 0.8em;
 }
 
-#timedCheckbox+label {
+#breakCheckbox + label {
+    cursor: pointer;
+    flex: 1;
+}
+
+#breakCheckbox + label .breakLabelText {
     color: rgba(255, 255, 255, 0.7);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-size: 0.9em;
-    margin-right: auto;
 }
 
-#timeoutInput {
-    width: 5em;
-    padding: 0.4em;
+#breakCheckbox + label .tooltip {
+    display: block;
+    font-size: 0.65em;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 0.2em;
+}
+
+.break-edit-btn,
+.break-save-btn {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0.3em;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    font-size: 1em;
+    padding: 0.2em 0.5em;
+    transition: all 0.2s ease;
+}
+
+.break-edit-btn.hidden {
+    display: none;
+}
+
+.break-edit-btn:hover,
+.break-save-btn:hover {
+    background-color: rgba(255, 0, 0, 0.3);
+    border-color: rgba(255, 0, 0, 0.6);
+}
+
+.breakEditMode {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    width: 100%;
+    margin-top: 0.5em;
+}
+
+.breakEditMode.hidden {
+    display: none;
+}
+
+.breakSliderWrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2em;
+}
+
+#breakRange {
+    width: 100%;
+    height: 0.4em;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0.2em;
+    cursor: pointer;
+}
+
+#breakRange::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1em;
+    height: 1em;
+    background: rgba(255, 0, 0, 0.75);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+#breakRange::-webkit-slider-thumb:hover {
+    background: rgba(255, 0, 0, 1);
+}
+
+#breakRange::-moz-range-thumb {
+    width: 1em;
+    height: 1em;
+    background: rgba(255, 0, 0, 0.75);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.breakTicks {
+    position: relative;
+    height: 1.2em;
+    margin-top: 0.2em;
+}
+
+.breakTicks span {
+    position: absolute;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.65em;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    transform: translateX(-50%);
+}
+
+.breakTicks span:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.breakTicks span[data-value="1"] { left: 0%; transform: translateX(0); }
+.breakTicks span[data-value="5"] { left: 39.3%; }
+.breakTicks span[data-value="15"] { left: 66.1%; }
+.breakTicks span[data-value="30"] { left: 83.0%; }
+.breakTicks span[data-value="60"] { left: 100%; transform: translateX(-100%); }
+
+#breakInput {
+    width: 3em;
+    padding: 0.3em;
     background-color: transparent;
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 0.3em;
     color: white;
-    font-size: 0.9em;
+    font-size: 0.85em;
     text-align: center;
     transition: all 0.2s ease;
+    -moz-appearance: textfield;
 }
 
-#timeoutInput.hidden {
-    visibility: hidden;
+#breakInput::-webkit-outer-spin-button,
+#breakInput::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
-#timeoutInput:focus {
+#breakInput:focus {
     outline: none;
     border-color: rgba(255, 0, 0, 0.6);
 }
 
-#timeoutInput::placeholder {
+.breakInputUnit {
     color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8em;
+}
+
+.breakProgress {
+    display: flex;
+    align-items: center;
+    gap: 0.8em;
+    width: 100%;
+}
+
+.breakProgress.hidden {
+    display: none;
+}
+
+.breakProgressBar {
+    flex: 1;
+    height: 0.5em;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.25em;
+    overflow: hidden;
+}
+
+.breakProgressFill {
+    height: 100%;
+    background-color: rgba(255, 0, 0, 0.75);
+    border-radius: 0.25em;
+    transition: width 0.5s linear;
+    width: 100%;
+}
+
+.breakTimeRemaining {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85em;
+    min-width: 4em;
+    text-align: right;
 }
 
 .youtubeMinimalContainer,
@@ -464,7 +615,7 @@ a:hover {
     height: 1.2em;
     accent-color: rgba(255, 0, 0, 0.75);
     cursor: pointer;
-    margin-right: 0.5em;
+    margin-right: 0.8em;
 }
 
 #youtubeMinimalCheckbox+label,
