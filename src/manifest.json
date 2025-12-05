@@ -41,6 +41,22 @@
                 "content.js"
             ],
             "run_at": "document_start"
+        },
+        {
+            "matches": [
+                "*://www.youtube.com/*",
+                "*://youtube.com/*"
+            ],
+            "js": [
+                "youtube-minimal.js"
+            ],
+            "run_at": "document_start"
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": ["assets/icon_color_128.png"],
+            "matches": ["*://www.youtube.com/*", "*://youtube.com/*"]
         }
     ]
 }

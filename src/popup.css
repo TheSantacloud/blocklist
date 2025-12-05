@@ -339,3 +339,34 @@ a:hover {
 #timeoutInput::placeholder {
     color: rgba(255, 255, 255, 0.5);
 }
+
+.youtubeMinimalContainer {
+    display: flex;
+    align-items: center;
+    padding: 0.5em;
+    margin: 1em;
+    background-color: #202020;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.5em;
+    transition: background-color 0.3s ease;
+}
+
+.youtubeMinimalContainer.active {
+    background-color: #2A0000;
+    border: 1px solid rgba(255, 0, 0, 0.5);
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+}
+
+#youtubeMinimalCheckbox {
+    transform: scale(1);
+    accent-color: rgba(255, 0, 0, 0.75);
+    cursor: pointer;
+    margin-right: 0.5em;
+}
+
+#youtubeMinimalCheckbox+label {
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.9em;
+}

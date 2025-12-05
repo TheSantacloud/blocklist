@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     populateInstructions();
     loadTimeoutInput();
+    loadYoutubeMinimalToggle();
 
     chrome.storage.sync.get("blockList", (data) => {
         if (data.blockList) {
@@ -269,5 +270,30 @@ function loadTimeoutInput() {
         let value = input.value;
         if (checkbox.checked == false) value = -1;
         chrome.storage.sync.set({ timeoutValue: value });
+    });
+}
+
+function loadYoutubeMinimalToggle() {
+    const checkbox = document.getElementById('youtubeMinimalCheckbox');
+    const container = document.querySelector('.youtubeMinimalContainer');
+
+    chrome.storage.sync.get("youtubeMinimalMode", (data) => {
+        if (data.youtubeMinimalMode) {
+            checkbox.checked = true;
+            container.classList.add("active");
+        } else {
+            checkbox.checked = false;
+            container.classList.remove("active");
+        }
+    });
+
+    checkbox.addEventListener('change', () => {
+        const isEnabled = checkbox.checked;
+        chrome.storage.sync.set({ youtubeMinimalMode: isEnabled });
+        if (isEnabled) {
+            container.classList.add("active");
+        } else {
+            container.classList.remove("active");
+        }
     });
 }

@@ -65,6 +65,15 @@ chrome.storage.onChanged.addListener((changes, area) => {
         }
     }
 
+    if ('youtubeMinimalMode' in changes) {
+        chrome.tabs.query({ url: "*://www.youtube.com/*" }, function(tabs) {
+            tabs.forEach(tab => chrome.tabs.reload(tab.id));
+        });
+        chrome.tabs.query({ url: "*://youtube.com/*" }, function(tabs) {
+            tabs.forEach(tab => chrome.tabs.reload(tab.id));
+        });
+    }
+
     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
         if (key !== "blockListEnabled") continue;
         if (key === "blockListEnabled" && oldValue === newValue) continue;
