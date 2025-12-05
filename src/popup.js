@@ -1,5 +1,37 @@
 let blockList = {};
 
+const FUNNY_REASONS = [
+    "Your future self will thank you",
+    "Touch grass instead",
+    "This is why you're behind on deadlines",
+    "Your attention span called, it wants its life back",
+    "Congratulations, you played yourself",
+    "Plot twist: the content isn't that good",
+    "Your brain cells are begging you to stop",
+    "Remember that thing you were supposed to do?",
+    "Dopamine machine broke",
+    "Time to be a functioning adult",
+    "Your productivity just filed a missing persons report",
+    "The algorithm doesn't love you back",
+    "This is not the way",
+    "Your mom would be disappointed",
+    "Go drink some water instead",
+    "Infinite scroll, finite life",
+    "Your dreams are in another castle",
+    "Error 404: Self-control not found",
+    "Breaking news: you're procrastinating again",
+    "This website won't remember you, but your regrets will",
+    "Somewhere, a book is crying",
+    "Your houseplants miss you",
+    "The void scrolls back",
+    "Achievement unlocked: wasted another hour",
+    "Your gym membership is judging you",
+];
+
+function getRandomReason() {
+    return FUNNY_REASONS[Math.floor(Math.random() * FUNNY_REASONS.length)];
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const searchBox = document.getElementById('searchBox');
     searchBox.addEventListener('input', (event) => searchData(event.target.value));
@@ -20,6 +52,24 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleEditMode(tr, true);
     });
 
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const url = btn.dataset.url;
+            if (url in blockList) {
+                delete blockList[url];
+                btn.classList.remove('added');
+                updateStorageBlocklist();
+            } else {
+                const tr = createTableRow(url, { desc: getRandomReason() });
+                tr.dataset.isPreset = 'true';
+                const tableBody = document.getElementById('tableBody');
+                tableBody.appendChild(tr);
+                btn.classList.add('added');
+                toggleEditMode(tr, false, true);
+            }
+        });
+    });
+
     populateInstructions();
     loadTimeoutInput();
     loadYoutubeMinimalToggle();
@@ -30,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
             blockList = data["blockList"];
         }
         populateTable(blockList);
+        updatePresetButtons();
     });
 
 });
@@ -83,7 +134,7 @@ function searchData(phrase) {
     populateTable(data);
 }
 
-function toggleEditMode(tr, fullEditMode) {
+function toggleEditMode(tr, fullEditMode, isPreset = false) {
     const isEditing = tr.classList.toggle('editing');
 
     if (!isEditing) {
@@ -93,54 +144,58 @@ function toggleEditMode(tr, fullEditMode) {
 
     const url = tr.querySelector('.url-col');
     const desc = tr.querySelector('.desc-col');
+    const originalDesc = desc.children[0].innerText;
+    const urlValue = url.children[0].innerText;
+
+    function setupDescInput(currentValue) {
+        desc.innerHTML = `<div class="desc-input-wrapper"><textarea rows="1">${currentValue}</textarea><button class="inline-randomize-btn" title="Randomize">&#x21BB;</button></div>`;
+        const descInput = desc.querySelector('textarea');
+        const randomBtn = desc.querySelector('.inline-randomize-btn');
+
+        function autoGrow() {
+            descInput.style.height = 'auto';
+            descInput.style.height = descInput.scrollHeight + 'px';
+        }
+        descInput.addEventListener('input', autoGrow);
+        setTimeout(autoGrow, 0);
+
+        randomBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            descInput.value = getRandomReason();
+            autoGrow();
+            descInput.focus();
+        });
+
+        descInput.addEventListener('keydown', event => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                saveRow(tr);
+            }
+        });
+
+        return descInput;
+    }
 
     if (fullEditMode) {
         chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
             var activeTab = tabs[0];
             var domain = new URL(activeTab.url).hostname.replace("www.", "");
+            const randomReason = getRandomReason();
 
-            url.innerHTML = `<input type="text" value=${domain} style="width: 100%; box-sizing: border-box;"/>`
-            desc.innerHTML = `<input type="text" value="${desc.children[0].innerText}" style="width: 100%; box-sizing: border-box;"/>`;
+            url.innerHTML = `<input type="text" value=${domain}/>`
+            const descInput = setupDescInput(randomReason);
+
             url.children[0].focus();
             url.children[0].select();
+
             url.addEventListener('keydown', event => {
-                if (event.key === 'Enter') desc.children[0].focus();
-            });
-            desc.addEventListener('keydown', event => {
-                if (event.key === 'Enter') saveRow(tr);
+                if (event.key === 'Enter') descInput.focus();
             });
         });
     } else {
-        const child = desc.children[0];
-        child.style = "color: white;";
-        child.contentEditable = true;
-
-        const selection = window.getSelection();
-        const range = document.createRange();
-        range.setStart(child, 0);
-        range.setEnd(child, 0);
-        selection.removeAllRanges();
-        selection.addRange(range);
-
-        child.addEventListener('keydown', event => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                saveRow(tr);
-            }
-            else if (event.key === 'Escape') {
-                event.preventDefault();
-                child.style = "";
-                child.contentEditable = false;
-            }
-        });
-
-        document.addEventListener('click', event => {
-            if (event.target.classList !== child.classList) {
-                child.style = "";
-                child.contentEditable = false;
-            }
-        });
-        desc.focus();
+        const descInput = setupDescInput(originalDesc);
+        descInput.focus();
+        descInput.setSelectionRange(descInput.value.length, descInput.value.length);
     }
 }
 
@@ -152,10 +207,12 @@ function saveRow(tr) {
         tr.classList.remove('editing');
     }
 
-    const urlValue = getTableElementValue(url);
+    let urlValue = getTableElementValue(url);
     const descValue = getTableElementValue(desc);
 
     if (!(urlValue && descValue)) return;
+
+    urlValue = urlValue.replace(/\/+$/, '');
 
     if (urlValue in blockList) {
         blockList[urlValue]["desc"] = descValue;
@@ -168,13 +225,17 @@ function saveRow(tr) {
 }
 
 function getTableElementValue(element) {
-    switch (element.children[0].tagName) {
+    const child = element.children[0];
+    switch (child.tagName) {
         case "SPAN":
-            return element.children[0].innerText;
+            return child.innerText;
         case "INPUT":
-            return element.children[0].value;
+            return child.value;
+        case "DIV":
+            const input = child.querySelector('textarea') || child.querySelector('input');
+            return input?.value || null;
         default:
-            console.error(`Row element unknown ${element.children[0].tagName}`);
+            console.error(`Row element unknown ${child.tagName}`);
             return null;
     }
 }
@@ -182,6 +243,17 @@ function getTableElementValue(element) {
 function updateStorageBlocklist() {
     chrome.storage.sync.set({ blockList: blockList });
     populateTable(blockList);
+    updatePresetButtons();
+}
+
+function updatePresetButtons() {
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+        if (btn.dataset.url in blockList) {
+            btn.classList.add('added');
+        } else {
+            btn.classList.remove('added');
+        }
+    });
 }
 
 function populateTable(data) {

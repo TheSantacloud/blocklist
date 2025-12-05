@@ -1,7 +1,5 @@
 # Blocklist
 
-## Discontinued! Using Raycast Focus
-
 A lightweight, private, no nonesense, local website blocker.
 
 ![screenshot](blocklist.png)
@@ -11,6 +9,8 @@ A lightweight, private, no nonesense, local website blocker.
 - **Quick toggle** - Enable via popup or shortcut (default: Ctrl-Shift-B)
 - **Auto refresh** - Automatically reloads pages on state changes
 - **Time-based blocking** - Optionally disable the blocker after a specified timeout period
+- **YouTube Minimal Mode** - Strips YouTube to search bar with collapsible Watch Later/History tabs
+- **Instagram Minimal Mode** - Redirects Instagram to DMs only
 
 ## FAQ:
 
@@ -20,13 +20,5 @@ A lightweight, private, no nonesense, local website blocker.
 
 ## TODO:
 
-- [X] Create a popup to enable/disable
-- [X] Change the operation to be icon based rather than popup
-- [X] Enable with shortcut
-- [X] Refresh page when enabled/disabled
-- [X] Popup setup (v1)
-- [X] Time-based blocking
-- [X] Add turn-off timer (that automatically turns off the enabled flag after X mins)
 - [ ] Per URL blocking
 - [ ] Connect to a pool of articles (or actually useful links) that I might wanna read instead and suggest them
-- [ ] Add presets

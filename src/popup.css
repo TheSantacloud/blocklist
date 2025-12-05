@@ -85,6 +85,108 @@ body {
     letter-spacing: 0.1em;
 }
 
+.presetsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.5em 1em;
+    margin: 0 0.5em;
+}
+
+.presetsLabel {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.preset-btn {
+    padding: 0.3em 0.6em;
+    background-color: rgba(255, 0, 0, 0.2);
+    border: 1px solid rgba(255, 0, 0, 0.4);
+    border-radius: 0.3em;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.75em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+    background-color: rgba(255, 0, 0, 0.4);
+    border-color: rgba(255, 0, 0, 0.6);
+}
+
+.preset-btn.added {
+    background-color: rgba(255, 0, 0, 0.6);
+    border-color: rgba(255, 0, 0, 0.8);
+}
+
+.randomize-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    padding: 0 0.3em;
+    opacity: 0.6;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.randomize-btn:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+.desc-input-wrapper {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    gap: 0.3em;
+}
+
+.desc-input-wrapper textarea {
+    flex: 1;
+    min-width: 0;
+    background-color: #202020;
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 0, 0, 0.4);
+    border-radius: 0.3em;
+    padding: 0.3em 0.5em;
+    font-family: inherit;
+    font-size: inherit;
+    resize: none;
+    overflow: hidden;
+    line-height: 1.4;
+}
+
+.url-col input {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #202020;
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 0, 0, 0.4);
+    border-radius: 0.3em;
+    padding: 0.3em 0.5em;
+}
+
+.inline-randomize-btn {
+    background: none;
+    border: 1px solid rgba(255, 0, 0, 0.4);
+    border-radius: 0.3em;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    font-size: 1em;
+    padding: 0.2em 0.4em;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    margin-top: 0.2em;
+}
+
+.inline-randomize-btn:hover {
+    background-color: rgba(255, 0, 0, 0.3);
+    border-color: rgba(255, 0, 0, 0.6);
+}
+
 .tableWrapper {
     max-height: 18em;
     overflow-y: auto;
@@ -135,7 +237,7 @@ td {
 .desc-col {
     width: 50%;
     cursor: input;
-    vertical-align: bottom;
+    vertical-align: middle;
 }
 
 .text-container {
@@ -145,10 +247,6 @@ td {
 
 .desc-col span {
     color: grey;
-    display: inline-block;
-    vertical-align: bottom;
-    line-height: 1;
-    margin-bottom: -0.1em;
 }
 
 .actions {
@@ -316,7 +414,7 @@ a:hover {
 }
 
 #timeoutInput {
-    width: 4em;
+    width: 5em;
     padding: 0.4em;
     background-color: transparent;
     border: 1px solid rgba(255, 255, 255, 0.3);
