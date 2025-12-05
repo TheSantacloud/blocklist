@@ -225,167 +225,173 @@ function isYoutubeHomepage() {
 function createMinimalUI(showLists = true) {
     document.documentElement.classList.add('blocklist-minimal');
 
-    const observer = new MutationObserver(() => {
+    function buildMinimalUI() {
         const searchbox = document.querySelector('yt-searchbox');
         const logo = document.querySelector('ytd-topbar-logo-renderer #logo-icon');
 
-        if (searchbox && logo && !document.getElementById('blocklist-minimal-container')) {
-            observer.disconnect();
-
-            const container = document.createElement('div');
-            container.id = 'blocklist-minimal-container';
-
-            const logoClone = logo.cloneNode(true);
-            logoClone.id = 'blocklist-minimal-logo';
-            container.appendChild(logoClone);
-
-            container.appendChild(searchbox);
-
-            if (!showLists) {
-                document.body.appendChild(container);
-                return;
-            }
-
-            const tabsContainer = document.createElement('div');
-            tabsContainer.id = 'blocklist-tabs-container';
-
-            const tabsHeader = document.createElement('div');
-            tabsHeader.className = 'blocklist-tabs-header';
-
-            const wlTabBtn = document.createElement('button');
-            wlTabBtn.className = 'blocklist-tab-btn';
-            wlTabBtn.textContent = 'Watch Later';
-            wlTabBtn.dataset.tab = 'watchlater';
-
-            const historyTabBtn = document.createElement('button');
-            historyTabBtn.className = 'blocklist-tab-btn';
-            historyTabBtn.textContent = 'History';
-            historyTabBtn.dataset.tab = 'history';
-
-            const refreshBtn = document.createElement('button');
-            refreshBtn.className = 'blocklist-refresh';
-            refreshBtn.textContent = '↻';
-            refreshBtn.title = 'Refresh';
-
-            tabsHeader.appendChild(wlTabBtn);
-            tabsHeader.appendChild(historyTabBtn);
-            tabsHeader.appendChild(refreshBtn);
-            tabsContainer.appendChild(tabsHeader);
-
-            const wlContent = document.createElement('div');
-            wlContent.className = 'blocklist-tab-content';
-            wlContent.dataset.tab = 'watchlater';
-
-            const wlSearch = document.createElement('input');
-            wlSearch.className = 'blocklist-search';
-            wlSearch.type = 'text';
-            wlSearch.placeholder = 'Filter watch later...';
-            wlContent.appendChild(wlSearch);
-
-            const watchLaterList = document.createElement('div');
-            watchLaterList.className = 'blocklist-list';
-            wlContent.appendChild(watchLaterList);
-
-            const wlFullLink = document.createElement('a');
-            wlFullLink.className = 'blocklist-full-link';
-            wlFullLink.href = 'https://www.youtube.com/playlist?list=WL';
-            wlFullLink.textContent = 'Go to full list →';
-            wlContent.appendChild(wlFullLink);
-
-            tabsContainer.appendChild(wlContent);
-
-            const historyContent = document.createElement('div');
-            historyContent.className = 'blocklist-tab-content';
-            historyContent.dataset.tab = 'history';
-
-            const historySearch = document.createElement('input');
-            historySearch.className = 'blocklist-search';
-            historySearch.type = 'text';
-            historySearch.placeholder = 'Filter history...';
-            historyContent.appendChild(historySearch);
-
-            const historyList = document.createElement('div');
-            historyList.className = 'blocklist-list';
-            historyContent.appendChild(historyList);
-
-            const historyFullLink = document.createElement('a');
-            historyFullLink.className = 'blocklist-full-link';
-            historyFullLink.href = 'https://www.youtube.com/feed/history';
-            historyFullLink.textContent = 'Go to full list →';
-            historyContent.appendChild(historyFullLink);
-
-            tabsContainer.appendChild(historyContent);
-
-            container.appendChild(tabsContainer);
-            document.body.appendChild(container);
-
-            let wlLoaded = false;
-            let historyLoaded = false;
-            let activeTab = null;
-            const timestamps = { watchlater: null, history: null };
-
-            function updateTooltip() {
-                if (!activeTab || !timestamps[activeTab]) return;
-                const ageMs = Date.now() - timestamps[activeTab];
-                const ageMins = Math.floor(ageMs / 60000);
-                const ageSecs = Math.floor((ageMs % 60000) / 1000);
-                if (ageMins > 0) {
-                    refreshBtn.title = `Cached ${ageMins}m ${ageSecs}s ago`;
-                } else {
-                    refreshBtn.title = `Cached ${ageSecs}s ago`;
-                }
-            }
-
-            setInterval(updateTooltip, 1000);
-
-            function activateTab(tabName, forceRefresh = false) {
-                activeTab = tabName;
-                document.querySelectorAll('.blocklist-tab-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.tab === tabName);
-                });
-                document.querySelectorAll('.blocklist-tab-content').forEach(content => {
-                    content.classList.toggle('active', content.dataset.tab === tabName);
-                });
-                refreshBtn.classList.add('visible');
-                updateTooltip();
-
-                if (tabName === 'watchlater' && (!wlLoaded || forceRefresh)) {
-                    wlLoaded = true;
-                    fetchVideoList('watch-later', watchLaterList, wlSearch, forceRefresh, refreshBtn, (ts) => { timestamps.watchlater = ts; updateTooltip(); });
-                } else if (tabName === 'history' && (!historyLoaded || forceRefresh)) {
-                    historyLoaded = true;
-                    fetchVideoList('history', historyList, historySearch, forceRefresh, refreshBtn, (ts) => { timestamps.history = ts; updateTooltip(); });
-                }
-            }
-
-            wlTabBtn.addEventListener('click', () => {
-                if (activeTab === 'watchlater') {
-                    activeTab = null;
-                    wlTabBtn.classList.remove('active');
-                    wlContent.classList.remove('active');
-                    refreshBtn.classList.remove('visible');
-                } else {
-                    activateTab('watchlater');
-                }
-            });
-            historyTabBtn.addEventListener('click', () => {
-                if (activeTab === 'history') {
-                    activeTab = null;
-                    historyTabBtn.classList.remove('active');
-                    historyContent.classList.remove('active');
-                    refreshBtn.classList.remove('visible');
-                } else {
-                    activateTab('history');
-                }
-            });
-            refreshBtn.addEventListener('click', () => {
-                if (activeTab) activateTab(activeTab, true);
-            });
+        if (!searchbox || !logo || document.getElementById('blocklist-minimal-container')) {
+            return false;
         }
+
+        const container = document.createElement('div');
+        container.id = 'blocklist-minimal-container';
+
+        const logoClone = logo.cloneNode(true);
+        logoClone.id = 'blocklist-minimal-logo';
+        container.appendChild(logoClone);
+
+        container.appendChild(searchbox);
+
+        if (!showLists) {
+            document.body.appendChild(container);
+            return true;
+        }
+
+        const tabsContainer = document.createElement('div');
+        tabsContainer.id = 'blocklist-tabs-container';
+
+        const tabsHeader = document.createElement('div');
+        tabsHeader.className = 'blocklist-tabs-header';
+
+        const wlTabBtn = document.createElement('button');
+        wlTabBtn.className = 'blocklist-tab-btn';
+        wlTabBtn.textContent = 'Watch Later';
+        wlTabBtn.dataset.tab = 'watchlater';
+
+        const historyTabBtn = document.createElement('button');
+        historyTabBtn.className = 'blocklist-tab-btn';
+        historyTabBtn.textContent = 'History';
+        historyTabBtn.dataset.tab = 'history';
+
+        const refreshBtn = document.createElement('button');
+        refreshBtn.className = 'blocklist-refresh';
+        refreshBtn.textContent = '↻';
+        refreshBtn.title = 'Refresh';
+
+        tabsHeader.appendChild(wlTabBtn);
+        tabsHeader.appendChild(historyTabBtn);
+        tabsHeader.appendChild(refreshBtn);
+        tabsContainer.appendChild(tabsHeader);
+
+        const wlContent = document.createElement('div');
+        wlContent.className = 'blocklist-tab-content';
+        wlContent.dataset.tab = 'watchlater';
+
+        const wlSearch = document.createElement('input');
+        wlSearch.className = 'blocklist-search';
+        wlSearch.type = 'text';
+        wlSearch.placeholder = 'Filter watch later...';
+        wlContent.appendChild(wlSearch);
+
+        const watchLaterList = document.createElement('div');
+        watchLaterList.className = 'blocklist-list';
+        wlContent.appendChild(watchLaterList);
+
+        const wlFullLink = document.createElement('a');
+        wlFullLink.className = 'blocklist-full-link';
+        wlFullLink.href = 'https://www.youtube.com/playlist?list=WL';
+        wlFullLink.textContent = 'Go to full list →';
+        wlContent.appendChild(wlFullLink);
+
+        tabsContainer.appendChild(wlContent);
+
+        const historyContent = document.createElement('div');
+        historyContent.className = 'blocklist-tab-content';
+        historyContent.dataset.tab = 'history';
+
+        const historySearch = document.createElement('input');
+        historySearch.className = 'blocklist-search';
+        historySearch.type = 'text';
+        historySearch.placeholder = 'Filter history...';
+        historyContent.appendChild(historySearch);
+
+        const historyList = document.createElement('div');
+        historyList.className = 'blocklist-list';
+        historyContent.appendChild(historyList);
+
+        const historyFullLink = document.createElement('a');
+        historyFullLink.className = 'blocklist-full-link';
+        historyFullLink.href = 'https://www.youtube.com/feed/history';
+        historyFullLink.textContent = 'Go to full list →';
+        historyContent.appendChild(historyFullLink);
+
+        tabsContainer.appendChild(historyContent);
+
+        container.appendChild(tabsContainer);
+        document.body.appendChild(container);
+
+        let wlLoaded = false;
+        let historyLoaded = false;
+        let activeTab = null;
+        const timestamps = { watchlater: null, history: null };
+
+        function updateTooltip() {
+            if (!activeTab || !timestamps[activeTab]) return;
+            const ageMs = Date.now() - timestamps[activeTab];
+            const ageMins = Math.floor(ageMs / 60000);
+            const ageSecs = Math.floor((ageMs % 60000) / 1000);
+            if (ageMins > 0) {
+                refreshBtn.title = `Cached ${ageMins}m ${ageSecs}s ago`;
+            } else {
+                refreshBtn.title = `Cached ${ageSecs}s ago`;
+            }
+        }
+
+        setInterval(updateTooltip, 1000);
+
+        function activateTab(tabName, forceRefresh = false) {
+            activeTab = tabName;
+            document.querySelectorAll('.blocklist-tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabName);
+            });
+            document.querySelectorAll('.blocklist-tab-content').forEach(content => {
+                content.classList.toggle('active', content.dataset.tab === tabName);
+            });
+            refreshBtn.classList.add('visible');
+            updateTooltip();
+
+            if (tabName === 'watchlater' && (!wlLoaded || forceRefresh)) {
+                wlLoaded = true;
+                fetchVideoList('watch-later', watchLaterList, wlSearch, forceRefresh, refreshBtn, (ts) => { timestamps.watchlater = ts; updateTooltip(); });
+            } else if (tabName === 'history' && (!historyLoaded || forceRefresh)) {
+                historyLoaded = true;
+                fetchVideoList('history', historyList, historySearch, forceRefresh, refreshBtn, (ts) => { timestamps.history = ts; updateTooltip(); });
+            }
+        }
+
+        wlTabBtn.addEventListener('click', () => {
+            if (activeTab === 'watchlater') {
+                activeTab = null;
+                wlTabBtn.classList.remove('active');
+                wlContent.classList.remove('active');
+                refreshBtn.classList.remove('visible');
+            } else {
+                activateTab('watchlater');
+            }
+        });
+        historyTabBtn.addEventListener('click', () => {
+            if (activeTab === 'history') {
+                activeTab = null;
+                historyTabBtn.classList.remove('active');
+                historyContent.classList.remove('active');
+                refreshBtn.classList.remove('visible');
+            } else {
+                activateTab('history');
+            }
+        });
+        refreshBtn.addEventListener('click', () => {
+            if (activeTab) activateTab(activeTab, true);
+        });
+
+        return true;
+    }
+
+    if (buildMinimalUI()) return;
+
+    const observer = new MutationObserver(() => {
+        if (buildMinimalUI()) observer.disconnect();
     });
-
     observer.observe(document.documentElement, { childList: true, subtree: true });
-
     setTimeout(() => observer.disconnect(), 10000);
 }
 
@@ -448,11 +454,24 @@ function fetchVideoList(action, container, searchInput, forceRefresh = false, re
 
 injectStyles();
 
-if (isYoutubeHomepage()) {
-    chrome.storage.sync.get(["youtubeMinimalMode", "youtubeShowLists"], ({ youtubeMinimalMode, youtubeShowLists }) => {
-        if (youtubeMinimalMode) {
+function tryActivateMinimalMode() {
+    if (!isYoutubeHomepage()) return;
+    if (document.getElementById('blocklist-minimal-container')) return;
+
+    chrome.storage.sync.get(["blockListEnabled", "youtubeMinimalMode", "youtubeShowLists"], ({ blockListEnabled, youtubeMinimalMode, youtubeShowLists }) => {
+        if (blockListEnabled && youtubeMinimalMode) {
             const showLists = youtubeShowLists !== false;
             createMinimalUI(showLists);
         }
     });
 }
+
+tryActivateMinimalMode();
+
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'sync') return;
+    if (!('blockListEnabled' in changes || 'youtubeMinimalMode' in changes)) return;
+    if (!isYoutubeHomepage()) return;
+
+    window.location.reload();
+});

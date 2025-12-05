@@ -38,14 +38,47 @@ function hideElements() {
     hideYourNote(mount);
 }
 
-chrome.storage.sync.get("instagramMinimalMode", ({ instagramMinimalMode }) => {
-    if (!instagramMinimalMode) return;
+let observer = null;
 
+function activateMinimalMode() {
     if (!isInboxPage()) {
         window.location.replace(INBOX_URL);
     } else {
-        const observer = new MutationObserver(hideElements);
-        observer.observe(document.documentElement, { childList: true, subtree: true });
         hideElements();
+        if (!observer) {
+            observer = new MutationObserver(hideElements);
+            observer.observe(document.documentElement, { childList: true, subtree: true });
+        }
     }
+}
+
+function deactivateMinimalMode() {
+    if (observer) {
+        observer.disconnect();
+        observer = null;
+    }
+    window.location.reload();
+}
+
+function tryActivate() {
+    chrome.storage.sync.get(["blockListEnabled", "instagramMinimalMode"], ({ blockListEnabled, instagramMinimalMode }) => {
+        if (blockListEnabled && instagramMinimalMode) {
+            activateMinimalMode();
+        }
+    });
+}
+
+tryActivate();
+
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'sync') return;
+    if (!('blockListEnabled' in changes || 'instagramMinimalMode' in changes)) return;
+
+    chrome.storage.sync.get(["blockListEnabled", "instagramMinimalMode"], ({ blockListEnabled, instagramMinimalMode }) => {
+        if (blockListEnabled && instagramMinimalMode) {
+            activateMinimalMode();
+        } else if (observer) {
+            deactivateMinimalMode();
+        }
+    });
 });
