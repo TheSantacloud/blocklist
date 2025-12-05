@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     populateInstructions();
     loadTimeoutInput();
     loadYoutubeMinimalToggle();
+    loadInstagramMinimalToggle();
 
     chrome.storage.sync.get("blockList", (data) => {
         if (data.blockList) {
@@ -276,9 +277,40 @@ function loadTimeoutInput() {
 function loadYoutubeMinimalToggle() {
     const checkbox = document.getElementById('youtubeMinimalCheckbox');
     const container = document.querySelector('.youtubeMinimalContainer');
+    const showListsCheckbox = document.getElementById('youtubeShowListsCheckbox');
 
-    chrome.storage.sync.get("youtubeMinimalMode", (data) => {
+    chrome.storage.sync.get(["youtubeMinimalMode", "youtubeShowLists"], (data) => {
         if (data.youtubeMinimalMode) {
+            checkbox.checked = true;
+            container.classList.add("active");
+        } else {
+            checkbox.checked = false;
+            container.classList.remove("active");
+        }
+        showListsCheckbox.checked = data.youtubeShowLists !== false;
+    });
+
+    checkbox.addEventListener('change', () => {
+        const isEnabled = checkbox.checked;
+        chrome.storage.sync.set({ youtubeMinimalMode: isEnabled });
+        if (isEnabled) {
+            container.classList.add("active");
+        } else {
+            container.classList.remove("active");
+        }
+    });
+
+    showListsCheckbox.addEventListener('change', () => {
+        chrome.storage.sync.set({ youtubeShowLists: showListsCheckbox.checked });
+    });
+}
+
+function loadInstagramMinimalToggle() {
+    const checkbox = document.getElementById('instagramMinimalCheckbox');
+    const container = document.querySelector('.instagramMinimalContainer');
+
+    chrome.storage.sync.get("instagramMinimalMode", (data) => {
+        if (data.instagramMinimalMode) {
             checkbox.checked = true;
             container.classList.add("active");
         } else {
@@ -289,7 +321,7 @@ function loadYoutubeMinimalToggle() {
 
     checkbox.addEventListener('change', () => {
         const isEnabled = checkbox.checked;
-        chrome.storage.sync.set({ youtubeMinimalMode: isEnabled });
+        chrome.storage.sync.set({ instagramMinimalMode: isEnabled });
         if (isEnabled) {
             container.classList.add("active");
         } else {

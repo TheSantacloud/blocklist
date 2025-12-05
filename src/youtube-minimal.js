@@ -222,7 +222,7 @@ function isYoutubeHomepage() {
     return window.location.pathname === '/' || window.location.pathname === '';
 }
 
-function createMinimalUI() {
+function createMinimalUI(showLists = true) {
     document.documentElement.classList.add('blocklist-minimal');
 
     const observer = new MutationObserver(() => {
@@ -240,6 +240,11 @@ function createMinimalUI() {
             container.appendChild(logoClone);
 
             container.appendChild(searchbox);
+
+            if (!showLists) {
+                document.body.appendChild(container);
+                return;
+            }
 
             const tabsContainer = document.createElement('div');
             tabsContainer.id = 'blocklist-tabs-container';
@@ -317,6 +322,21 @@ function createMinimalUI() {
             let wlLoaded = false;
             let historyLoaded = false;
             let activeTab = null;
+            const timestamps = { watchlater: null, history: null };
+
+            function updateTooltip() {
+                if (!activeTab || !timestamps[activeTab]) return;
+                const ageMs = Date.now() - timestamps[activeTab];
+                const ageMins = Math.floor(ageMs / 60000);
+                const ageSecs = Math.floor((ageMs % 60000) / 1000);
+                if (ageMins > 0) {
+                    refreshBtn.title = `Cached ${ageMins}m ${ageSecs}s ago`;
+                } else {
+                    refreshBtn.title = `Cached ${ageSecs}s ago`;
+                }
+            }
+
+            setInterval(updateTooltip, 1000);
 
             function activateTab(tabName, forceRefresh = false) {
                 activeTab = tabName;
@@ -327,13 +347,14 @@ function createMinimalUI() {
                     content.classList.toggle('active', content.dataset.tab === tabName);
                 });
                 refreshBtn.classList.add('visible');
+                updateTooltip();
 
                 if (tabName === 'watchlater' && (!wlLoaded || forceRefresh)) {
                     wlLoaded = true;
-                    fetchVideoList('watch-later', watchLaterList, wlSearch, forceRefresh, refreshBtn);
+                    fetchVideoList('watch-later', watchLaterList, wlSearch, forceRefresh, refreshBtn, (ts) => { timestamps.watchlater = ts; updateTooltip(); });
                 } else if (tabName === 'history' && (!historyLoaded || forceRefresh)) {
                     historyLoaded = true;
-                    fetchVideoList('history', historyList, historySearch, forceRefresh, refreshBtn);
+                    fetchVideoList('history', historyList, historySearch, forceRefresh, refreshBtn, (ts) => { timestamps.history = ts; updateTooltip(); });
                 }
             }
 
@@ -368,10 +389,13 @@ function createMinimalUI() {
     setTimeout(() => observer.disconnect(), 10000);
 }
 
-function fetchVideoList(action, container, searchInput, forceRefresh = false, refreshBtn = null) {
+function fetchVideoList(action, container, searchInput, forceRefresh = false, refreshBtn = null, onTimestamp = null) {
     if (refreshBtn) refreshBtn.classList.add('loading');
     chrome.runtime.sendMessage({ action: `fetch-${action}`, forceRefresh }, (response) => {
         if (refreshBtn) refreshBtn.classList.remove('loading');
+        if (response && response.timestamp && onTimestamp) {
+            onTimestamp(response.timestamp);
+        }
         if (response && response.success && response.videos.length > 0) {
             const videos = response.videos;
 
@@ -425,9 +449,10 @@ function fetchVideoList(action, container, searchInput, forceRefresh = false, re
 injectStyles();
 
 if (isYoutubeHomepage()) {
-    chrome.storage.sync.get("youtubeMinimalMode", ({ youtubeMinimalMode }) => {
+    chrome.storage.sync.get(["youtubeMinimalMode", "youtubeShowLists"], ({ youtubeMinimalMode, youtubeShowLists }) => {
         if (youtubeMinimalMode) {
-            createMinimalUI();
+            const showLists = youtubeShowLists !== false;
+            createMinimalUI(showLists);
         }
     });
 }

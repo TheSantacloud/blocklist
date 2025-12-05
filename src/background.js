@@ -78,11 +78,20 @@ chrome.storage.onChanged.addListener((changes, area) => {
     }
   }
 
-  if ("youtubeMinimalMode" in changes) {
+  if ("youtubeMinimalMode" in changes || "youtubeShowLists" in changes) {
     chrome.tabs.query({ url: "*://www.youtube.com/*" }, function (tabs) {
       tabs.forEach((tab) => chrome.tabs.reload(tab.id));
     });
     chrome.tabs.query({ url: "*://youtube.com/*" }, function (tabs) {
+      tabs.forEach((tab) => chrome.tabs.reload(tab.id));
+    });
+  }
+
+  if ("instagramMinimalMode" in changes) {
+    chrome.tabs.query({ url: "*://www.instagram.com/*" }, function (tabs) {
+      tabs.forEach((tab) => chrome.tabs.reload(tab.id));
+    });
+    chrome.tabs.query({ url: "*://instagram.com/*" }, function (tabs) {
       tabs.forEach((tab) => chrome.tabs.reload(tab.id));
     });
   }
@@ -123,14 +132,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       cache.watchLater.data &&
       Date.now() - cache.watchLater.timestamp < CACHE_TTL
     ) {
-      sendResponse(cache.watchLater.data);
+      sendResponse({ ...cache.watchLater.data, timestamp: cache.watchLater.timestamp });
       return true;
     }
     fetchWatchLater().then((result) => {
+      const timestamp = Date.now();
       if (result.success) {
-        cache.watchLater = { data: result, timestamp: Date.now() };
+        cache.watchLater = { data: result, timestamp };
       }
-      sendResponse(result);
+      sendResponse({ ...result, timestamp });
     });
     return true;
   }
@@ -141,14 +151,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       cache.history.data &&
       Date.now() - cache.history.timestamp < CACHE_TTL
     ) {
-      sendResponse(cache.history.data);
+      sendResponse({ ...cache.history.data, timestamp: cache.history.timestamp });
       return true;
     }
     fetchHistory().then((result) => {
+      const timestamp = Date.now();
       if (result.success) {
-        cache.history = { data: result, timestamp: Date.now() };
+        cache.history = { data: result, timestamp };
       }
-      sendResponse(result);
+      sendResponse({ ...result, timestamp });
     });
     return true;
   }

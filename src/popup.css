@@ -340,8 +340,10 @@ a:hover {
     color: rgba(255, 255, 255, 0.5);
 }
 
-.youtubeMinimalContainer {
+.youtubeMinimalContainer,
+.instagramMinimalContainer {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     padding: 0.5em;
     margin: 1em;
@@ -351,22 +353,66 @@ a:hover {
     transition: background-color 0.3s ease;
 }
 
-.youtubeMinimalContainer.active {
+.youtubeMinimalContainer.active,
+.instagramMinimalContainer.active {
     background-color: #2A0000;
     border: 1px solid rgba(255, 0, 0, 0.5);
     box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
 }
 
-#youtubeMinimalCheckbox {
-    transform: scale(1);
+#youtubeMinimalCheckbox,
+#instagramMinimalCheckbox {
+    width: 1.2em;
+    height: 1.2em;
     accent-color: rgba(255, 0, 0, 0.75);
     cursor: pointer;
     margin-right: 0.5em;
 }
 
-#youtubeMinimalCheckbox+label {
+#youtubeMinimalCheckbox+label,
+#instagramMinimalCheckbox+label {
     color: rgba(255, 255, 255, 0.7);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     font-size: 0.9em;
+    cursor: pointer;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.tooltip {
+    display: block;
+    font-size: 0.7em;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: none;
+    letter-spacing: 0;
+    margin-top: 0.2em;
+}
+
+.youtubeMinimalSuboption {
+    display: none;
+    width: 100%;
+    margin-top: 0.5em;
+    padding-left: 1.5em;
+}
+
+.youtubeMinimalContainer.active .youtubeMinimalSuboption {
+    display: flex;
+    align-items: center;
+}
+
+#youtubeShowListsCheckbox {
+    width: 1em;
+    height: 1em;
+    accent-color: rgba(255, 0, 0, 0.75);
+    cursor: pointer;
+    margin-right: 0.5em;
+}
+
+#youtubeShowListsCheckbox+label {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8em;
+    letter-spacing: 0.05em;
+    cursor: pointer;
 }
