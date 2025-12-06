@@ -22,3 +22,4 @@ A lightweight, private, no nonesense, local website blocker.
 
 - [ ] Per URL blocking
 - [ ] Connect to a pool of articles (or actually useful links) that I might wanna read instead and suggest them
+- [ ] Release to Chrome Web Store
